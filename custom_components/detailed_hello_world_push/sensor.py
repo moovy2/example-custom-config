@@ -7,14 +7,18 @@
 # battery), the unit_of_measurement should match what's expected.
 import random
 
-from homeassistant.const import (
-    ATTR_VOLTAGE,
-    DEVICE_CLASS_BATTERY,
-    DEVICE_CLASS_ILLUMINANCE,
-    PERCENTAGE,
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
 )
+from homeassistant.const import (
+    PERCENTAGE,
+    LIGHT_LUX,
+)
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from . import HubConfigEntry
 from .const import DOMAIN
 
 
@@ -22,9 +26,13 @@ from .const import DOMAIN
 # Note how both entities for each roller sensor (battry and illuminance) are added at
 # the same time to the same list. This way only a single async_add_devices call is
 # required.
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: HubConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Add sensors for passed config_entry in HA."""
-    hub = hass.data[DOMAIN][config_entry.entry_id]
+    hub = config_entry.runtime_data
 
     new_devices = []
     for roller in hub.rollers:
@@ -79,7 +87,7 @@ class BatterySensor(SensorBase):
     # The class of this device. Note the value should come from the homeassistant.const
     # module. More information on the available devices classes can be seen here:
     # https://developers.home-assistant.io/docs/core/entity/sensor
-    device_class = DEVICE_CLASS_BATTERY
+    device_class = SensorDeviceClass.BATTERY
 
     # The unit of measurement for this entity. As it's a DEVICE_CLASS_BATTERY, this
     # should be PERCENTAGE. A number of units are supported by HA, for some
@@ -113,8 +121,8 @@ class BatterySensor(SensorBase):
 class IlluminanceSensor(SensorBase):
     """Representation of a Sensor."""
 
-    device_class = DEVICE_CLASS_ILLUMINANCE
-    _attr_unit_of_measurement = "lx"
+    device_class = SensorDeviceClass.ILLUMINANCE
+    _attr_unit_of_measurement = LIGHT_LUX
 
     def __init__(self, roller):
         """Initialize the sensor."""

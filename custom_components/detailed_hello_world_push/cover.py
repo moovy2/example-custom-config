@@ -7,15 +7,13 @@ from typing import Any
 # See below for how they are used.
 from homeassistant.components.cover import (
     ATTR_POSITION,
-    SUPPORT_CLOSE,
-    SUPPORT_OPEN,
-    SUPPORT_SET_POSITION,
+    CoverEntityFeature,
     CoverEntity,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from . import HubConfigEntry
 from .const import DOMAIN
 
 
@@ -23,13 +21,13 @@ from .const import DOMAIN
 # hass.config_entries.async_forward_entry_setup call)
 async def async_setup_entry(
     hass: HomeAssistant,
-    config_entry: ConfigEntry,
+    config_entry: HubConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add cover for passed config_entry in HA."""
-    # The hub is loaded from the associated hass.data entry that was created in the
+    # The hub is loaded from the associated entry runtime data that was set in the
     # __init__.async_setup_entry function
-    hub = hass.data[DOMAIN][config_entry.entry_id]
+    hub = config_entry.runtime_data
 
     # Add all entities to HA
     async_add_entities(HelloWorldCover(roller) for roller in hub.rollers)
@@ -47,7 +45,7 @@ class HelloWorldCover(CoverEntity):
     # imported above, we can tell HA the features that are supported by this entity.
     # If the supported features were dynamic (ie: different depending on the external
     # device it connected to), then this should be function with an @property decorator.
-    supported_features = SUPPORT_SET_POSITION | SUPPORT_OPEN | SUPPORT_CLOSE
+    supported_features = CoverEntityFeature.SET_POSITION | CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE
 
     def __init__(self, roller) -> None:
         """Initialize the sensor."""
